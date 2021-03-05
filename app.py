@@ -117,8 +117,7 @@ def get_entities():
 
 @app.route('/get_entities_normalized', methods=['POST'])
 def get_entities_normalized():
-    import json
-
+    
     # ambil data dari json yang diterima endpoint
     data = request.get_json()
     
@@ -129,19 +128,15 @@ def get_entities_normalized():
     doc = nlp(text)
     
     # membuat pasangan label dan nilai entitas
-    d = []
-    if len(doc.ents) > 0:
-        for ent in doc.ents:
-            d.append((ent.label_,ent.text))
+    d = [(ent.label_, ent.text) for ent in doc.ents]
 
     # transform pasangan label menjadi dataframe 
     df = pd.DataFrame(d, columns=['category', 'value'])
     
     dicti = dict()
-    for cat, val in zip(df['category'], df['value']):
-        if cat not in dicti:
-            dicti[cat] = []
-        dicti[cat].append(val)    
+    for cat in df['category'].unique():
+        subset = df.loc[df['category'] == cat, 'value']
+        dicti[cat] = subset.to_list()
 
     return (json.dumps(dicti))        
 
